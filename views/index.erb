@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Catwalk - An overhead view of your delivery process</title>
+  </head>
+  <body>
+    <h1>Echo</h1>
+    <form id="form">
+      <input type="text" id="input" placeholder="send a message"></input>
+    </form>
+    <div id="msgs"></div>
+    <script type="text/javascript">
+      window.onload = function() {
+        console.log('window loaded');
+        (function() {
+          console.log('executing init function');
+          var show = function(el) {
+            console.log('show initialized');
+            return function(msg) {
+              console.log('show called with ' + msg);
+              el.innerHTML = msg + '<br />' + el.innerHTML;
+            }
+          }(document.getElementById('msgs'));
+
+          var ws = new WebSocket('ws://' + window.location.host + '/socket');
+          ws.onopen = function() { console.log('socket opened'); show('websocket opened'); };
+          ws.onclose = function() { console.log('socket cloased'); show('websocket closed'); };
+          ws.onmessage = function(m) { console.log('got message'); show('websocket message: ' + m.data); };
+
+          var sender = function(f) {
+            var input = document.getElementById('input');
+            f.onsubmit = function(e) {
+              e.preventDefault();
+              ws.send(input.value);
+              return false;
+            }
+          }(document.getElementById('form'));
+        })();
+      };
+    </script>
+  </body>
+</html>
